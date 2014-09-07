@@ -44,6 +44,10 @@ class Receiptd
   REDEEMCODE_HEADER = "X-Redeemcode"
   ADMIN_HEADER = "X-Admin"
 
+  # `root` specifies the "slashdir" for serving static files. `db` indicates
+  # a path to store the collection of redeemcodes for the files under the
+  # `root`. `admin_key` is the key that is required in order to make changes
+  # to the database.
   def initialize(root, db, admin_key, *options)
     @root = File.absolute_path(root)
     @admin_key = admin_key
@@ -67,10 +71,14 @@ class Receiptd
 
   private
 
+  # Transforms a HTTP requeset header into a Rack environment variable. For
+  # example, "X-Foo-Bar" becomes "HTTP_X_FOO_BAR".
   def to_rack_header(str)
     return "HTTP_" + str.upcase.gsub("-", "_")
   end
 
+  # Sets up the HTTP response to return useful information, mainly when
+  # interacting with curl(1).
   def complain(status, message=nil)
     @res.status = status
     @res["Content-Type"] = "text/plain;charset=ascii"
@@ -78,10 +86,15 @@ class Receiptd
     @res.write(message + "\n") if message
   end
 
+  # Returns a simple 200 OK response for successful requests that are NOT
+  # for files under the root.
   def ok
     complain(200)
   end
 
+  # For a given path under the root, return an array of the redeemcodes set
+  # up for that path. This method might return nil, indicating there are no
+  # redeemcodes for that file.
   def codes_for_file(path)
     return @db.transaction { @db[path] }
   end
