@@ -6,9 +6,9 @@ url=http://localhost:9292
 text_file=/test.txt
 nonexistent_file=/ffffff.txt
 
-redeem_header0=-H "X-Redeemcode: ffffffff"
-redeem_header1=-H "X-Redeemcode: a1b2c3d4e5f6"
-redeem_header2=-H "X-Redeemcode: 6f5e4d3c2b1a"
+redeem_header0=-G -d "redeemcode=ffffffff"
+redeem_header1=-G -d "redeemcode=a1b2c3d4e5f6"
+redeem_header2=-G -d "redeemcode=6f5e4d3c2b1a"
 admin_header=-H "X-Admin: abcd1234"
 
 redeem_form1=-d redeemcode=a1b2c3d4e5f6

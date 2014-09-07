@@ -41,7 +41,7 @@ require 'pstore'
 
 class Receiptd
   MEGABYTE = 1024 * 1024
-  REDEEMCODE_HEADER = "X-Redeemcode"
+  REDEEMCODE_PARAM = "redeemcode"
   ADMIN_HEADER = "X-Admin"
 
   # `root` specifies the "slashdir" for serving static files. `db` indicates
@@ -101,9 +101,9 @@ class Receiptd
 
   # Returns the static file.
   def _get
-    if not (redeemcode = @req.env[to_rack_header(REDEEMCODE_HEADER)])
-      complain(401, sprintf("Expecting request header \"%s\"",
-        REDEEMCODE_HEADER))
+    if not (redeemcode = @req.GET[REDEEMCODE_PARAM])
+      complain(401, sprintf("Expecting request parameter \"%s\"",
+        REDEEMCODE_PARAM))
       return
     end
 
