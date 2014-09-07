@@ -41,8 +41,8 @@ require 'pstore'
 
 class Receiptd
   MEGABYTE = 1024 * 1024
-  REDEEMCODE_PARAM = "redeemcode"
-  ADMIN_HEADER = "X-Admin"
+  REDEEMCODE_PARAM = "redeemcode".freeze
+  ADMIN_HEADER = "X-Admin".freeze
 
   # `root` specifies the "slashdir" for serving static files. `db` indicates
   # a path to store the collection of redeemcodes for the files under the
