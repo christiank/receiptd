@@ -27,3 +27,9 @@ then the receiptd responds with "401 Unauthorized."
 ## Low level description
 
 This is a Ruby/Rack application. TODO: add more here. 
+
+
+## License
+
+receiptd is released under a 2-clause BSD-style license. See the LICENSE
+file for details.
