@@ -32,15 +32,42 @@
 # - Should we store the adminkey in the database? Or store it in some other
 # database? This will allow the admin to change the key without bringing the
 # server down.
-# - Investigate streaming responses.
 # - Let the admin change the MIME-types map.
 #
 
 require 'rack'
 require 'pstore'
 
+class FileWrapper
+  PARTSIZE = 8192
+
+  def initialize(path)
+    @path = path
+    @f = File.open(@path, "rb")
+  end
+
+  def length
+    return File::Stat.new(@path).size
+  end
+
+  def to_path
+    return @path
+  end
+
+  def each
+    s = ""
+    while s
+      s = @f.read(PARTSIZE)
+      yield s if s
+    end
+  end
+
+  def close
+    @f.close
+  end
+end
+
 class Receiptd
-  MEGABYTE = 1024 * 1024
   REDEEMCODE_PARAM = "redeemcode".freeze
   ADMIN_HEADER = "X-Admin".freeze
 
@@ -115,26 +142,30 @@ class Receiptd
       return
     end
 
-    if !codes_for_file(path_info).include?(redeemcode)
+    relevant_codes = codes_for_file(path_info)
+
+    if !relevant_codes
+      complain(400, sprintf("There are no redeemcodes for file \"%s\"",
+        path_info))
+      return
+    end
+
+    if !relevant_codes.include?(redeemcode)
       complain(401, sprintf(
         "\"%s\" is not a valid redeemcode for file \"%s\"",
         redeemcode, path_info))
       return
     end
 
-    mime = Rack::Mime.mime_type(File.basename(path_info))
-    @res["Content-Type"] = mime
-
-    f = File.open(real_file, "r")
-    s = ""
-
-    while s 
-      s = f.read(MEGABYTE)
-      @res.write(s) if s
-    end
-
-    f.close
+    @res["Content-Type"] = Rack::Mime.mime_type(File.extname(path_info))
+    @res["Connection"] = "keep-alive"
+    @res["Content-Disposition"] = sprintf("attachment;filename=\"%s\"",
+      File.basename(path_info))
     @res.status = 200
+
+    f = FileWrapper.new(real_file)
+    @res["Content-Length"] = f.length.to_s
+    @res.body = f
   end
 
   # Updates the database of redeemcodes.
