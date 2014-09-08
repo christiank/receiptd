@@ -1,4 +1,6 @@
-require './receiptd'
+require './receiptmiddleware'
 use Rack::CommonLogger
-adminkey = "abcd1235"
-run Receiptd.new("./testroot", "receiptd.pstore", adminkey)
+#use Rack::ShowStatus
+#use Rack::ShowExceptions
+use ReceiptMiddleware, "receiptd.pstore", "abcd1234"
+run Rack::File.new("./testroot")
